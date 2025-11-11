@@ -39,11 +39,11 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 </div>
 
 <script>
-/* === CONFIG === */
-const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD"; // isi Client ID dari Kick Developer Portal
-const REDIRECT_URI = window.location.origin + window.location.pathname; // harus sama dengan di Kick Developer Portal
+/* CONFIGURATION */
+const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD"; // Client ID dari Kick Developer
+const REDIRECT_URI = window.location.origin + window.location.pathname; // HARUS SAMA DENGAN DI KICK DEV
 
-/* === LOGIN === */
+/* LOGIN FUNCTION */
 function loginKick(){
   if(!CLIENT_ID){
     showError("Client ID belum diisi!");
@@ -52,45 +52,45 @@ function loginKick(){
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
-    response_type: 'code',
-    scope: 'chat:read chat:write',
-    state: 'kick-bot-padang'
+    response_type: "code",
+    scope: "chat:read chat:write",
+    state: "kick-bot-padang"
   });
-  window.location.href = `https://kick.com/oauth/authorize?${params.toString()}`;
+  window.location.href = "https://kick.com/oauth/authorize?" + params.toString();
 }
 
-/* === CALLBACK HANDLER === */
+/* CALLBACK HANDLER */
 function handleCallback(){
   const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
+  const code = urlParams.get("code");
   if(code){
-    // HTML-only → pakai dummy token untuk UI
-    sessionStorage.setItem('kick_token','dummy_token_'+Date.now());
-    document.getElementById('login').style.display='none';
-    document.getElementById('bot').style.display='block';
-    document.getElementById('status').textContent='Login sukses!';
-    history.replaceState({}, '', REDIRECT_URI);
+    // HTML-only → pakai dummy token
+    sessionStorage.setItem("kick_token","dummy_token_"+Date.now());
+    document.getElementById("login").style.display = "none";
+    document.getElementById("bot").style.display = "block";
+    document.getElementById("status").textContent = "Login sukses!";
+    history.replaceState({}, "", REDIRECT_URI);
   }
 }
 
-/* === START BOT === */
+/* START BOT (UI ONLY) */
 function startBot(){
-  const channel = document.getElementById('channel').value.trim();
-  const token = sessionStorage.getItem('kick_token');
+  const channel = document.getElementById("channel").value.trim();
+  const token = sessionStorage.getItem("kick_token");
   if(!channel || !token) return showError("Login dulu!");
-  document.getElementById('status').textContent=`Bot aktif di #${channel}! (UI only)`;
+  document.getElementById("status").textContent = `Bot aktif di #${channel}! (UI only)`;
 }
 
-/* === ERROR === */
+/* ERROR HANDLER */
 function showError(msg){
-  const e = document.getElementById('error');
+  const e = document.getElementById("error");
   e.textContent = msg;
-  e.style.display = 'block';
-  setTimeout(()=> e.style.display='none',5000);
+  e.style.display = "block";
+  setTimeout(()=> e.style.display="none",5000);
 }
 
-/* === INIT === */
-window.addEventListener('load', handleCallback);
+/* INIT */
+window.addEventListener("load", handleCallback);
 </script>
 </body>
 </html>
