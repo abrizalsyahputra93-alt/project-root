@@ -1,28 +1,23 @@
 import fetch from 'node-fetch';
 
-export default async function handler(req,res){
-  const { code } = req.query;
-  if(!code) return res.status(400).json({ error:'Code tidak ada' });
+export default async function handler(req, res){
+  const code = req.query.code;
+  if(!code) return res.status(400).json({error:'No code'});
 
-  const CLIENT_ID = process.env.KICK_CLIENT_ID;
-  const CLIENT_SECRET = process.env.KICK_CLIENT_SECRET;
-  const REDIRECT_URI = process.env.KICK_REDIRECT_URI;
+  const params = new URLSearchParams({
+    client_id: process.env.VITE_KICK_CLIENT_ID,
+    client_secret: process.env.KICK_CLIENT_SECRET,
+    redirect_uri: process.env.VITE_KICK_REDIRECT_URI,
+    grant_type: 'authorization_code',
+    code
+  });
 
-  try{
-    const r = await fetch('https://kick.com/oauth/token',{
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({
-        client_id:CLIENT_ID,
-        client_secret:CLIENT_SECRET,
-        code,
-        grant_type:'authorization_code',
-        redirect_uri:REDIRECT_URI
-      })
-    });
-    const data = await r.json();
-    res.status(200).json(data);
-  }catch(e){
-    res.status(500).json({ error:e.message });
-  }
+  const response = await fetch('https://kick.com/api/oauth/token',{
+    method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:params.toString()
+  });
+
+  const data = await response.json();
+  res.status(200).json(data);
 }
