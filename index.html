@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kick Bot Padang</title>
 <style>
+/* UI modern sama seperti sebelumnya */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
 .card{background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:25px;padding:40px 30px;max-width:480px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.5);text-align:center;transition:0.3s;}
@@ -31,7 +32,8 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 
   <div id="bot" style="display:none;">
     <input type="text" id="channel" placeholder="Masukkan channel kamu" />
-    <button onclick="startBot()">Start Bot</button>
+    <input type="text" id="message" placeholder="Pesan yang dikirim" />
+    <button onclick="startBot()">Kirim Pesan</button>
     <div class="status" id="status">Siap...</div>
   </div>
 
@@ -39,16 +41,10 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 </div>
 
 <script>
-/* CONFIGURATION */
-const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD"; // Client ID dari Kick Developer
-const REDIRECT_URI = window.location.origin + window.location.pathname; // HARUS SAMA DENGAN DI KICK DEV
+const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD";
+const REDIRECT_URI = window.location.origin + window.location.pathname;
 
-/* LOGIN FUNCTION */
 function loginKick(){
-  if(!CLIENT_ID){
-    showError("Client ID belum diisi!");
-    return;
-  }
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
@@ -59,37 +55,53 @@ function loginKick(){
   window.location.href = "https://kick.com/oauth/authorize?" + params.toString();
 }
 
-/* CALLBACK HANDLER */
-function handleCallback(){
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get("code");
+async function handleCallback(){
+  const code = new URLSearchParams(window.location.search).get("code");
   if(code){
-    // HTML-only → pakai dummy token
-    sessionStorage.setItem("kick_token","dummy_token_"+Date.now());
-    document.getElementById("login").style.display = "none";
-    document.getElementById("bot").style.display = "block";
-    document.getElementById("status").textContent = "Login sukses!";
-    history.replaceState({}, "", REDIRECT_URI);
+    // Tukar code → token via backend
+    try{
+      const res = await fetch(`/api/token?code=${code}`);
+      const data = await res.json();
+      if(data.access_token){
+        sessionStorage.setItem("kick_token", data.access_token);
+        document.getElementById("login").style.display="none";
+        document.getElementById("bot").style.display="block";
+        document.getElementById("status").textContent="Login sukses!";
+        history.replaceState({}, "", REDIRECT_URI);
+      } else {
+        showError("Gagal ambil token!");
+      }
+    } catch(err){
+      showError(err.message);
+    }
   }
 }
 
-/* START BOT (UI ONLY) */
-function startBot(){
+async function startBot(){
   const channel = document.getElementById("channel").value.trim();
+  const message = document.getElementById("message").value.trim();
   const token = sessionStorage.getItem("kick_token");
-  if(!channel || !token) return showError("Login dulu!");
-  document.getElementById("status").textContent = `Bot aktif di #${channel}! (UI only)`;
+  if(!channel || !token) return showError("Login dulu atau isi channel!");
+  try{
+    const res = await fetch("/api/bot",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({channel, message, token})
+    });
+    const data = await res.json();
+    document.getElementById("status").textContent = data.id ? "Pesan terkirim!" : JSON.stringify(data);
+  } catch(err){
+    showError(err.message);
+  }
 }
 
-/* ERROR HANDLER */
 function showError(msg){
   const e = document.getElementById("error");
   e.textContent = msg;
-  e.style.display = "block";
+  e.style.display="block";
   setTimeout(()=> e.style.display="none",5000);
 }
 
-/* INIT */
 window.addEventListener("load", handleCallback);
 </script>
 </body>
