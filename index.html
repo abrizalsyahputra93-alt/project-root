@@ -7,13 +7,14 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border-radius:25px;padding:40px 30px;max-width:450px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.4);text-align:center;}
-h1{font-size:32px;margin-bottom:10px;}
-p{margin-bottom:25px;opacity:0.8;font-size:15px;}
+.card{background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:25px;padding:40px 30px;max-width:480px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.5);text-align:center;transition:0.3s;}
+.card:hover{transform:translateY(-5px);}
+h1{font-size:34px;margin-bottom:10px;}
+p{margin-bottom:25px;opacity:0.85;font-size:16px;}
 input,button{width:100%;padding:14px;margin:12px 0;border-radius:12px;border:none;font-size:16px;transition:0.3s;}
-input{background:rgba(255,255,255,0.15);color:white;}
+input{background:rgba(255,255,255,0.2);color:white;}
 input::placeholder{color:rgba(255,255,255,0.7);}
-button{background:linear-gradient(90deg,#00d26a,#00b359);color:white;font-weight:bold;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,0.3);}
+button{background:linear-gradient(90deg,#00d26a,#00b359);color:white;font-weight:bold;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.35);}
 button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:translateY(-2px);}
 .status{margin-top:15px;font-size:14px;opacity:0.9;min-height:18px;}
 .error{color:#ff6b6b;background:rgba(255,107,107,0.15);padding:10px;border-radius:8px;margin:12px 0;display:none;font-size:14px;text-align:center;}
@@ -21,27 +22,33 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 </head>
 <body>
 <div class="card">
-<h1>Kick Bot Padang</h1>
-<p>Bot chat dari Sumatera Barat</p>
+  <h1>Kick Bot Padang</h1>
+  <p>Bot chat dari Sumatera Barat</p>
 
-<div id="login">
-  <button onclick="loginKick()">Login dengan Kick</button>
-</div>
+  <div id="login">
+    <button onclick="loginKick()">Login dengan Kick</button>
+  </div>
 
-<div id="bot" style="display:none;">
-  <input type="text" id="channel" placeholder="Masukkan channel kamu" />
-  <button onclick="startBot()">Start Bot</button>
-  <div class="status" id="status">Siap...</div>
-</div>
+  <div id="bot" style="display:none;">
+    <input type="text" id="channel" placeholder="Masukkan channel kamu" />
+    <button onclick="startBot()">Start Bot</button>
+    <div class="status" id="status">Siap...</div>
+  </div>
 
-<div id="error" class="error"></div>
+  <div id="error" class="error"></div>
 </div>
 
 <script>
-const CLIENT_ID = import.meta.env.VITE_KICK_CLIENT_ID;
-const REDIRECT_URI = import.meta.env.VITE_KICK_REDIRECT_URI;
+/* === CONFIG === */
+const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD"; // isi Client ID dari Kick Developer Portal
+const REDIRECT_URI = window.location.origin + window.location.pathname; // harus sama dengan di Kick Developer Portal
 
+/* === LOGIN === */
 function loginKick(){
+  if(!CLIENT_ID){
+    showError("Client ID belum diisi!");
+    return;
+  }
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
@@ -52,44 +59,37 @@ function loginKick(){
   window.location.href = `https://kick.com/oauth/authorize?${params.toString()}`;
 }
 
-async function handleCallback(){
+/* === CALLBACK HANDLER === */
+function handleCallback(){
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get('code');
   if(code){
-    const res = await fetch(`/api/token?code=${code}`);
-    const data = await res.json();
-    if(data.access_token){
-      sessionStorage.setItem('kick_token', data.access_token);
-      document.getElementById('login').style.display='none';
-      document.getElementById('bot').style.display='block';
-      document.getElementById('status').textContent='Login sukses!';
-      history.replaceState({}, '', REDIRECT_URI);
-    } else {
-      showError('Gagal login');
-    }
+    // HTML-only → pakai dummy token untuk UI
+    sessionStorage.setItem('kick_token','dummy_token_'+Date.now());
+    document.getElementById('login').style.display='none';
+    document.getElementById('bot').style.display='block';
+    document.getElementById('status').textContent='Login sukses!';
+    history.replaceState({}, '', REDIRECT_URI);
   }
 }
 
-async function startBot(){
+/* === START BOT === */
+function startBot(){
   const channel = document.getElementById('channel').value.trim();
   const token = sessionStorage.getItem('kick_token');
-  if(!channel || !token) return showError('Login dulu!');
-  const res = await fetch('/api/bot', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({channel, token})
-  });
-  const data = await res.json();
-  document.getElementById('status').textContent = data.message || 'Bot aktif!';
+  if(!channel || !token) return showError("Login dulu!");
+  document.getElementById('status').textContent=`Bot aktif di #${channel}! (UI only)`;
 }
 
+/* === ERROR === */
 function showError(msg){
   const e = document.getElementById('error');
-  e.textContent=msg;
-  e.style.display='block';
-  setTimeout(()=>e.style.display='none',5000);
+  e.textContent = msg;
+  e.style.display = 'block';
+  setTimeout(()=> e.style.display='none',5000);
 }
 
+/* === INIT === */
 window.addEventListener('load', handleCallback);
 </script>
 </body>
