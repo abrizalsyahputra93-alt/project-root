@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kick Bot Padang</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
@@ -22,7 +22,7 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 <body>
 <div class="card">
   <h1>Kick Bot Padang</h1>
-  <p>Bot chat interaktif dari Sumatera Barat</p>
+  <p>Bot chat dari Sumatera Barat</p>
 
   <div id="login">
     <button onclick="loginKick()">Login dengan Kick</button>
@@ -38,11 +38,14 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 </div>
 
 <script>
-const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD";
-const REDIRECT_URI = window.location.origin + window.location.pathname;
+const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD"; // Sesuaikan dengan Developer Portal
+const REDIRECT_URI = window.location.origin + window.location.pathname; // harus sama dengan di Developer Portal
 
-// redirect ke Kick OAuth
 function loginKick(){
+  if(!CLIENT_ID){
+    showError('Client ID belum diisi!');
+    return;
+  }
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
@@ -50,39 +53,28 @@ function loginKick(){
     scope: 'chat:read chat:write',
     state: 'kick-bot-padang'
   });
+  // redirect ke endpoint OAuth resmi Kick
   window.location.href = `https://kick.com/oauth/authorize?${params.toString()}`;
 }
 
-// tukar code → access_token via backend
-async function exchangeToken(code){
-  try{
-    const res = await fetch(`/api/token?code=${code}`);
-    const data = await res.json();
-    if(data.access_token){
-      sessionStorage.setItem('kick_token', data.access_token);
-      document.getElementById('login').style.display='none';
-      document.getElementById('bot').style.display='block';
-      document.getElementById('status').textContent='Login sukses!';
-      history.replaceState({}, '', REDIRECT_URI);
-    } else showError(data.error||'Gagal tukar token');
-  }catch(e){ showError(e.message); }
+function handleCallback(){
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  if(code){
+    // di HTML-only kita pakai dummy token untuk UI
+    sessionStorage.setItem('kick_token','dummy_token_'+Date.now());
+    document.getElementById('login').style.display='none';
+    document.getElementById('bot').style.display='block';
+    document.getElementById('status').textContent='Login sukses! (dummy token)';
+    history.replaceState({}, '', REDIRECT_URI);
+  }
 }
 
-// Start bot → kirim pesan
-async function startBot(){
+function startBot(){
   const channel = document.getElementById('channel').value.trim();
   const token = sessionStorage.getItem('kick_token');
-  if(!channel||!token) return showError('Login dulu!');
-  document.getElementById('status').textContent='Mengirim pesan...';
-  try{
-    const res = await fetch('/api/bot',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ channel, token })
-    });
-    const data = await res.json();
-    document.getElementById('status').textContent=data.message||'Bot aktif!';
-  }catch(e){ showError(e.message); }
+  if(!channel || !token) return showError('Login dulu!');
+  document.getElementById('status').textContent=`Bot aktif di #${channel}! (hanya UI, pesan tidak terkirim)`;
 }
 
 function showError(msg){
@@ -92,13 +84,7 @@ function showError(msg){
   setTimeout(()=>e.style.display='none',5000);
 }
 
-// cek query code dari redirect Kick
-const urlParams = new URLSearchParams(window.location.search);
-const code = urlParams.get('code');
-if(code){
-  document.getElementById('status').textContent='Menukar code...';
-  exchangeToken(code);
-}
+window.addEventListener('load', handleCallback);
 </script>
 </body>
 </html>
