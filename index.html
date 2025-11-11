@@ -41,6 +41,7 @@ button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:transla
 const CLIENT_ID = "01K9SEDGKEAB4KH7WAJ8Q2XGVD";
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 
+// Redirect ke Kick OAuth
 function login(){
   const params = new URLSearchParams({
     client_id: CLIENT_ID,
@@ -52,6 +53,7 @@ function login(){
   window.location.href = `https://kick.com/oauth/authorize?${params.toString()}`;
 }
 
+// Tukar code → access_token via backend
 async function exchangeToken(code){
   try{
     const res = await fetch(`/api/token?code=${code}`);
@@ -66,6 +68,7 @@ async function exchangeToken(code){
   } catch(e){ showError(e.message); }
 }
 
+// Mulai bot: kirim pesan
 async function startBot(){
   const channel = document.getElementById('channel').value.trim();
   const token = sessionStorage.getItem('kick_token');
@@ -82,6 +85,7 @@ async function startBot(){
   } catch(e){ showError(e.message); }
 }
 
+// Tampilkan error
 function showError(msg){
   const e = document.getElementById('error');
   e.textContent=msg;
@@ -89,10 +93,13 @@ function showError(msg){
   setTimeout(()=>e.style.display='none',5000);
 }
 
-// cek redirect balik
+// **Otomatis cek query code saat redirect balik dari Kick**
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
-if(code) exchangeToken(code);
+if(code){
+  document.getElementById('status').textContent='Menukar code...';
+  exchangeToken(code);
+}
 </script>
 </body>
 </html>
