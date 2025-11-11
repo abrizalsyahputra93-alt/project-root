@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kick Bot Padang</title>
 <style>
-/* UI modern sama seperti sebelumnya */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
 .card{background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:25px;padding:40px 30px;max-width:480px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,0.5);text-align:center;transition:0.3s;}
@@ -58,7 +57,6 @@ function loginKick(){
 async function handleCallback(){
   const code = new URLSearchParams(window.location.search).get("code");
   if(code){
-    // Tukar code → token via backend
     try{
       const res = await fetch(`/api/token?code=${code}`);
       const data = await res.json();
