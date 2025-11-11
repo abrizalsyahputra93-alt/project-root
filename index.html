@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Kick Bot Padang</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-  body{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-  .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border-radius:25px;padding:40px 30px;max-width:450px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.4);text-align:center;}
-  h1{font-size:32px;margin-bottom:10px;letter-spacing:1px;}
-  p{margin-bottom:25px;opacity:0.8;font-size:15px;}
-  input,button{width:100%;padding:14px;margin:12px 0;border-radius:12px;border:none;font-size:16px;transition:0.3s;}
-  input{background:rgba(255,255,255,0.15);color:white;}
-  input::placeholder{color:rgba(255,255,255,0.7);}
-  button{background:linear-gradient(90deg,#00d26a,#00b359);color:white;font-weight:bold;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,0.3);}
-  button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:translateY(-2px);}
-  .status{margin-top:15px;font-size:14px;opacity:0.9;min-height:18px;transition:0.3s;}
-  .error{color:#ff6b6b;background:rgba(255,107,107,0.15);padding:10px;border-radius:8px;margin:12px 0;display:none;font-size:14px;text-align:center;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:linear-gradient(135deg,#1e3c72,#2a5298);color:white;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.card{background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border-radius:25px;padding:40px 30px;max-width:450px;width:100%;box-shadow:0 20px 40px rgba(0,0,0,0.4);text-align:center;}
+h1{font-size:32px;margin-bottom:10px;letter-spacing:1px;}
+p{margin-bottom:25px;opacity:0.8;font-size:15px;}
+input,button{width:100%;padding:14px;margin:12px 0;border-radius:12px;border:none;font-size:16px;transition:0.3s;}
+input{background:rgba(255,255,255,0.15);color:white;}
+input::placeholder{color:rgba(255,255,255,0.7);}
+button{background:linear-gradient(90deg,#00d26a,#00b359);color:white;font-weight:bold;cursor:pointer;box-shadow:0 6px 15px rgba(0,0,0,0.3);}
+button:hover{background:linear-gradient(90deg,#00b359,#00d26a);transform:translateY(-2px);}
+.status{margin-top:15px;font-size:14px;opacity:0.9;min-height:18px;transition:0.3s;}
+.error{color:#ff6b6b;background:rgba(255,107,107,0.15);padding:10px;border-radius:8px;margin:12px 0;display:none;font-size:14px;text-align:center;}
 </style>
 </head>
 <body>
@@ -89,7 +89,7 @@ function showError(msg){
   setTimeout(()=>e.style.display='none',5000);
 }
 
-// Cek redirect balik
+// cek redirect balik
 const urlParams = new URLSearchParams(window.location.search);
 const code = urlParams.get('code');
 if(code) exchangeToken(code);
